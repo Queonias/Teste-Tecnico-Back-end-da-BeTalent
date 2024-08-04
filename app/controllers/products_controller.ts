@@ -47,4 +47,16 @@ export default class ProductsController {
             return response.status(400).json({ message: 'Error updating product', error })
         }
     }
+
+    // Método para excluir um produto
+    async destroy({ params, response }: HttpContext) {
+        try {
+            const product: Product = await Product.findOrFail(params.id)
+            product.is_deleted = true
+            await product.save()
+            return response.status(200).json({ message: 'Product deleted successfully' })
+        } catch (error) {
+            return response.status(400).json({ message: 'Error deleting product', error })
+        }
+    }
 }
