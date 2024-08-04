@@ -7,7 +7,7 @@ export default class UsersController {
 
 
         // Verifica se o usuário já existe
-        const existingUser = await User.findBy('email', email)
+        const existingUser: User | null = await User.findBy('email', email)
         if (existingUser) {
             return response.badRequest({ message: 'User already exists' })
         }
