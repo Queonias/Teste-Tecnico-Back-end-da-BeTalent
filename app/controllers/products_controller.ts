@@ -32,4 +32,19 @@ export default class ProductsController {
             return response.status(400).json({ message: 'Error creating product', error })
         }
     }
+
+    // Método para atualizar um produto
+    async update({ params, request, response }: HttpContext) {
+        try {
+            const product: Product = await Product.findOrFail(params.id)
+            const data = request.only(['name', 'price', 'description'])
+
+            product.merge(data)
+            await product.save()
+
+            return response.status(200).json(product)
+        } catch (error) {
+            return response.status(400).json({ message: 'Error updating product', error })
+        }
+    }
 }
