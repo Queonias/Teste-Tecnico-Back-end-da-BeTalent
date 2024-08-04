@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Database from '@adonisjs/lucid/services/db'
-import { DateTime } from 'luxon'
 
 // Models
 import Client from '../models/client.js'
@@ -62,7 +61,7 @@ export default class ClientsController {
         const trx = await Database.transaction()
         try {
             // Cria e salva um novo cliente usando a transação
-            const { name, cpf, addresses, phones } = request.only(['name', 'cpf', 'addresses', 'phones'])
+            const { name, cpf, addresses, phones } = request.all();
             const client = new Client()
             client.name = name
             client.cpf = cpf
@@ -78,7 +77,7 @@ export default class ClientsController {
                     address.neighborhood = addressData.neighborhood
                     address.city = addressData.city
                     address.state = addressData.state
-                    address.postal_code = addressData.zipCode
+                    address.cep = addressData.zipCode
                     address.client_id = client.id
                     address.useTransaction(trx)
                     await address.save()
@@ -103,6 +102,61 @@ export default class ClientsController {
         } catch (error) {
             await trx.rollback()
             return response.status(400).json({ message: 'Error saving client', error })
+        }
+    }
+
+    async update({ params, request, response }: HttpContext) {
+        // Obtém o ID do cliente dos parâmetros da rota
+        const clientId = params.id
+        const { name, cpf, addresses, phones } = request.all();
+
+        // Início da transação
+        const trx = await Database.transaction()
+
+        try {
+            // Obtém o cliente
+            const client: Client = await Client.findOrFail(clientId)
+            client.name = name
+            client.cpf = cpf
+            client.useTransaction(trx)
+            await client.save()
+
+            // Atualiza os endereços do cliente
+            if (addresses && addresses.length > 0) {
+                await Address.query({ client: trx }).where('client_id', clientId).delete()
+                for (const addressData of addresses) {
+                    const address = new Address()
+                    address.street = addressData.street
+                    address.number = addressData.number
+                    address.neighborhood = addressData.neighborhood
+                    address.city = addressData.city
+                    address.state = addressData.state
+                    address.cep = addressData.zipCode
+                    address.client_id = client.id
+                    address.useTransaction(trx)
+                    await address.save()
+                }
+            }
+
+            // Atualiza os telefones do cliente
+            if (phones && phones.length > 0) {
+                await Phone.query({ client: trx }).where('client_id', clientId).delete()
+                for (const phoneData of phones) {
+                    const phone = new Phone()
+                    phone.number = phoneData.number
+                    phone.client_id = client.id
+                    phone.useTransaction(trx)
+                    await phone.save()
+                }
+            }
+
+            // Commit da transação se tudo der certo
+            await trx.commit()
+            return response.status(200).json(client)
+        } catch (error) {
+            // Rollback em caso de erro
+            await trx.rollback()
+            return response.status(400).json({ message: 'Error updating client', error })
         }
     }
 }

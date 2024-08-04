@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.string('neighborhood').notNullable()
       table.string('city').notNullable()
       table.string('state').notNullable()
-      table.string('CEP').notNullable()
+      table.string('cep').notNullable()
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

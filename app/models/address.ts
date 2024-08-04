@@ -29,7 +29,7 @@ export default class Address extends BaseModel {
   declare state: string
 
   @column()
-  declare postal_code: string
+  declare cep: string
 
   @belongsTo(() => Client)
   declare client: BelongsTo<typeof Client>

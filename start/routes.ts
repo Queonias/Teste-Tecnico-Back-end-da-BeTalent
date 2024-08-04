@@ -8,3 +8,4 @@ router.post('/api/users/login', [UsersController, 'login']);
 
 router.get('/api/clients/list', [ClientsController, 'index']);
 router.get('/api/clients/:id', [ClientsController, 'show']);
+router.post('/api/clients/save', [ClientsController, 'store']);
