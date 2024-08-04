@@ -10,3 +10,4 @@ router.get('/api/clients/list', [ClientsController, 'index']);
 router.get('/api/clients/:id', [ClientsController, 'show']);
 router.post('/api/clients/save', [ClientsController, 'store']);
 router.put('/api/clients/:id', [ClientsController, 'update']);
+router.delete('/api/clients/:id', [ClientsController, 'destroy']);
