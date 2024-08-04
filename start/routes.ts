@@ -7,3 +7,4 @@ router.post('/api/users/signup', [UsersController, 'signup']);
 router.post('/api/users/login', [UsersController, 'login']);
 
 router.get('/api/clients/list', [ClientsController, 'index']);
+router.get('/api/clients/:id', [ClientsController, 'show']);
