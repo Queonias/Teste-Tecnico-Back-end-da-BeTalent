@@ -1,8 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import Database from '@adonisjs/lucid/services/db'
+import { DateTime } from 'luxon'
 
 // Models
 import Client from '../models/client.js'
 import Sale from '../models/sale.js'
+import Address from '../models/address.js'
+import Phone from '../models/phone.js'
 
 export default class ClientsController {
     // Método para listar todos os clientes
@@ -50,6 +54,55 @@ export default class ClientsController {
             })
         } catch (error) {
             return response.status(400).json({ message: 'Error fetching client details', error })
+        }
+    }
+
+    // Método para criar um novo cliente
+    async store({ request, response }: HttpContext) {
+        const trx = await Database.transaction()
+        try {
+            // Cria e salva um novo cliente usando a transação
+            const { name, cpf, addresses, phones } = request.only(['name', 'cpf', 'addresses', 'phones'])
+            const client = new Client()
+            client.name = name
+            client.cpf = cpf
+            client.useTransaction(trx)
+            await client.save()
+
+            // Salva os endereços, telefones e vendas do cliente
+            if (addresses && addresses.length > 0) {
+                for (const addressData of addresses) {
+                    const address = new Address()
+                    address.street = addressData.street
+                    address.number = addressData.number
+                    address.neighborhood = addressData.neighborhood
+                    address.city = addressData.city
+                    address.state = addressData.state
+                    address.postal_code = addressData.zipCode
+                    address.client_id = client.id
+                    address.useTransaction(trx)
+                    await address.save()
+                }
+            }
+
+            // Salva os telefones do cliente
+            if (phones && phones.length > 0) {
+                for (const phoneData of phones) {
+                    const phone = new Phone()
+                    phone.number = phoneData.number
+                    phone.client_id = client.id
+                    phone.useTransaction(trx)
+                    await phone.save()
+                }
+            }
+
+            // Commit da transação se tudo der certo
+            await trx.commit()
+            return response.status(201).json(client)
+
+        } catch (error) {
+            await trx.rollback()
+            return response.status(400).json({ message: 'Error saving client', error })
         }
     }
 }
