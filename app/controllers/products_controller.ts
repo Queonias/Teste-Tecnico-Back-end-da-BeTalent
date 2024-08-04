@@ -21,4 +21,15 @@ export default class ProductsController {
             return response.status(404).json({ message: 'Product not found', error })
         }
     }
+
+    // Método para criar um novo produto
+    async store({ request, response }: HttpContext) {
+        try {
+            const data = request.only(['name', 'price', 'description'])
+            const product: Product = await Product.create(data)
+            return response.status(201).json(product)
+        } catch (error) {
+            return response.status(400).json({ message: 'Error creating product', error })
+        }
+    }
 }
