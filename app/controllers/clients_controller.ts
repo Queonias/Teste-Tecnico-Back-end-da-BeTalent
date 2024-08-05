@@ -28,8 +28,10 @@ export default class ClientsController {
         try {
             const client: Client = await Client.findOrFail(clientId)
 
-            // Cria uma query para buscar as vendas do cliente, ordenadas pela data de venda em ordem decrescente
+            // Cria uma query para busca no banco de dados
             let salesQuery = Sale.query().where('client_id', clientId).orderBy('sale_date', 'desc')
+            let addressesQuery = Address.query().where('client_id', clientId)
+            let phonesQuery = Phone.query().where('client_id', clientId)
 
             // Se os parâmetros de mês e ano estão presentes, adiciona filtros para eles na query
             if (month && year) {
@@ -38,18 +40,18 @@ export default class ClientsController {
                     .andWhereRaw('YEAR(sale_date) = ?', [year]) // Filtra pelo ano da venda
             }
 
-            // Executa a query e obtém as vendas
-            const sales = await salesQuery.exec()
+            // Executa as query e retorna os resultados
+            const sales: Sale[] = await salesQuery.exec()
+            const address: Address[] = await addressesQuery.exec()
+            const phones: Phone[] = await phonesQuery.exec()
 
             return response.status(200).json({
-                client: {
-                    id: client.id,
-                    name: client.name,
-                    cpf: client.cpf,
-                    createdAt: client.createdAt,
-                    updatedAt: client.updatedAt
-                },
-                sales
+                id: client.id,
+                name: client.name,
+                cpf: client.cpf,
+                addresses: address,
+                phones: phones,
+                sales: sales
             })
         } catch (error) {
             return response.status(400).json({ message: 'Error fetching client details', error })
@@ -77,7 +79,7 @@ export default class ClientsController {
                     address.neighborhood = addressData.neighborhood
                     address.city = addressData.city
                     address.state = addressData.state
-                    address.cep = addressData.zipCode
+                    address.cep = addressData.cep
                     address.client_id = client.id
                     address.useTransaction(trx)
                     await address.save()
@@ -131,7 +133,7 @@ export default class ClientsController {
                     address.neighborhood = addressData.neighborhood
                     address.city = addressData.city
                     address.state = addressData.state
-                    address.cep = addressData.zipCode
+                    address.cep = addressData.cep
                     address.client_id = client.id
                     address.useTransaction(trx)
                     await address.save()
@@ -154,7 +156,7 @@ export default class ClientsController {
             return response.status(200).json(client)
         } catch (error) {
             await trx.rollback()
-            return response.status(400).json({ message: 'Error updating client', error })
+            return response.status(400).json({ message: 'Erro ao atualizar o cliente', error })
         }
     }
 
@@ -174,10 +176,10 @@ export default class ClientsController {
             await client.useTransaction(trx).delete()
             await trx.commit()
 
-            return response.status(200).json({ message: 'Client and related sales, addresses, and phones deleted successfully' })
+            return response.status(200).json({ message: 'Clientes e vendas relacionadas, endereços e telefones excluídos com sucesso' })
         } catch (error) {
             await trx.rollback()
-            return response.status(400).json({ message: 'Error deleting client and related sales', error })
+            return response.status(400).json({ message: 'Erro ao excluir cliente e vendas relacionadas', error })
         }
     }
 }

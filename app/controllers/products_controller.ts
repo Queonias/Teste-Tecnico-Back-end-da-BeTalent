@@ -8,7 +8,7 @@ export default class ProductsController {
             const products: Product[] = await Product.query().where('is_deleted', false).select('id', 'name', 'price').orderBy('name', 'asc')
             return response.status(200).json(products)
         } catch (error) {
-            return response.status(400).json({ message: 'Error fetching products', error })
+            return response.status(400).json({ message: 'Erro ao buscar produtos', error })
         }
     }
 
@@ -18,7 +18,7 @@ export default class ProductsController {
             const product: Product = await Product.query().where('id', params.id).andWhere('is_deleted', false).firstOrFail()
             return response.status(200).json(product)
         } catch (error) {
-            return response.status(404).json({ message: 'Product not found', error })
+            return response.status(404).json({ message: 'Produto não encontrado', error })
         }
     }
 
@@ -29,7 +29,7 @@ export default class ProductsController {
             const product: Product = await Product.create(data)
             return response.status(201).json(product)
         } catch (error) {
-            return response.status(400).json({ message: 'Error creating product', error })
+            return response.status(400).json({ message: 'Erro ao criar produto', error })
         }
     }
 
@@ -44,7 +44,7 @@ export default class ProductsController {
 
             return response.status(200).json(product)
         } catch (error) {
-            return response.status(400).json({ message: 'Error updating product', error })
+            return response.status(400).json({ message: 'Erro ao atualizar o produto', error })
         }
     }
 
@@ -54,9 +54,9 @@ export default class ProductsController {
             const product: Product = await Product.findOrFail(params.id)
             product.is_deleted = true
             await product.save()
-            return response.status(200).json({ message: 'Product deleted successfully' })
+            return response.status(200).json({ message: 'Produto excluído com sucesso' })
         } catch (error) {
-            return response.status(400).json({ message: 'Error deleting product', error })
+            return response.status(400).json({ message: 'Erro ao excluir produto', error })
         }
     }
 }
