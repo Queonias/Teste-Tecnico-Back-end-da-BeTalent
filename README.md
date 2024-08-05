@@ -334,7 +334,7 @@ Authorization: Bearer {seu_token_aqui}
 
   ```json
     {
-      "id": 1
+      "id": 1,
       "name": "Produto 1",
       "description": "Descrição do Produto 1",
       "price": 100.00

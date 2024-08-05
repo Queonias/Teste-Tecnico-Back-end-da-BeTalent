@@ -8,8 +8,6 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('name').notNullable()
       table.string('cpf').notNullable().unique()
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
     })
   }
 
